@@ -12,14 +12,14 @@
 #include <SFML/Graphics.hpp>
 //#include <array>
 
-#define _INVALID_RANGE  0;
-#define _WATER			1;
-#define _ICE			2;
-#define _SAND			3;
-#define _GRASS			4;
-#define _SHRUB			5;
-#define _FOREST			6;
-#define _DIRT			7;
+#define _INVALID  -1;
+#define _WATER			171;
+#define _BARREL			68;
+#define _SAND			100;
+#define _GRASS			150;
+#define _SHRUB			281;
+#define _ROCK			167;
+#define _DIRT			34;
 
 using namespace std;
 using namespace noise;
@@ -86,7 +86,24 @@ private:
 	sf::Texture m_tileset;
 };
 
-void tileTransitions()
+int * initializeTiles(int t_width, int t_height)
+{
+	const int t_size = t_width * t_height;
+	auto tiles = new int[t_size];
+	for (int i = 0; i < t_size; i++)
+	{ tiles[i] = _INVALID; }
+	return tiles;
+}
+
+void copyTiles(int *tiles, int* m_copy, int t_width, int t_height)
+{
+	//auto m_copy = new int[t_width * t_height];
+	const int limit = t_width * t_height;
+	for (int i = 0; i < limit; i++)	
+	{	m_copy[i] = tiles[i];	}
+	//return m_copy;
+}
+int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr, int level_width, int level_height)
 {
 /*
 The tiles are 16x16 and if a tile's index goes from top to bottom,
@@ -99,35 +116,54 @@ L	c	R
 DL	D	DR
 Assume that those are true if the tile is grass and false if it isn't
 */
-	sf::Vector2i tile_indices(24, 12);
-	bool UL, U, UR, L, R, DL, D, DR;
-	UL = U = UR = L = R = DL = D = DR = false;
-	int ul, u, ur, l, r, dl, d, dr;
-	ul = u = ur = l = r = dl = d = dr = _INVALID_RANGE;
-	const int invalid_range = _INVALID_RANGE;
+	const int invalid_range = _INVALID;
 	const int water			= _WATER;
-	const int ice			= _ICE;
+	const int barrel		= _BARREL;
 	const int sand			= _SAND;
 	const int grass			= _GRASS;
 	const int shrub			= _SHRUB;
-	const int forest		= _FOREST;
+	const int rock			= _ROCK;
 	const int dirt			= _DIRT;
+	const int last_tile		= (level_width * level_height) - 1;
 
-	int c = _INVALID_RANGE;
+	//Check that c is a valid index
+	assert(c >= 0);
+	assert(c <= last_tile);
+
+	//If c is not grass, just return c
+	if (c != grass)
+		return c;
+	
+	//Otherwise check for transitions
+	bool UL, U, UR, L, R, DL, D, DR;
+	UL	= (ul	== grass);
+	U	= (u	== grass);
+	UR	= (ur	== grass);
+	L	= (l	== grass);
+	R	= (r	== grass);
+	DL	= (dl	== grass);
+	D	= (d	== grass);
+	DR	= (dr	== grass);
+	/*
+	//int ul, u, ur, l, r, dl, d, dr;
+	//ul = u = ur = l = r = dl = d = dr = _INVALID_RANGE;
+	//sf::Vector2i tile_indices(level_width, level_height);
+	if (c == grass)
+	{
+		UL = U = UR = L = R = DL = D = DR = true;
+	}
+	//int c = _INVALID_RANGE;
 	//c = _WATER;
 	//c = _ICE;
 	//c = _SAND;
-	c = _GRASS;
+	//c = _GRASS;
 	//c = _SHRUB;
 	//c = _FOREST;
 	//c = _DIRT;
-
+*/
+	
 	int index = -1;
 
-	if (c == water)
-		index = 196;
-	if (c == dirt)
-		index = 100;
 	if (c == grass)
 	{
 		if (U && D && L && R)
@@ -152,16 +188,13 @@ Assume that those are true if the tile is grass and false if it isn't
 			index = 125;
 			if (ul == water)
 				index += 144;
-		}
-		
+		}		
 		if (U && D && L && !R) 
 		{
 			index = 24;
 			if (r == water)
 				index += 144;
 		}
-
-		/////////////////////
 		if (U && D && !L && R)
 		{
 			index = 29;
@@ -202,67 +235,47 @@ Assume that those are true if the tile is grass and false if it isn't
 				index += 144;
 		}
 	}
-
-/*
-If c is water
-	index = 196
-If c is dirt
-	index = 100
-If c is grass
-	if U && D && L && R
-		index = 174
-	if U && D && L && R && !DR
-                index = 0
-                if DR is water
-                	index += 144;
-	if U && D && L && R && !DL
-                index = 5
-                if DL is water
-                	index += 144;
-    if U && D && L && R && !UR
-                index = 120
-                if UR is water
-                	index += 144;
-	if U && D && L && R && !UL
-                index = 125
-                if UL is water
-                	index += 144;    
-        
-	if U && D && L && !R
-                index = 24
-                if R is water
-                	index += 144;
-	if U && D && !L && R
-                index = 29
-                if L is water
-                	index += 144;
-        if !U && D && L && R
-                index = 121
-                if U is water
-                	index += 144;
-	if U && !D && L && R
-                index = 1
-                if D is water
-                	index += 144;  
-        
-        if !U && D && L && !R
-                index = 26
-                if R is water
-                	index += 144;        
-	if !U && D && !L && R
-                index = 25
-                if U is water
-                	index += 144;
-	if U && !D && !L && R
-                index = 49
-                if L is water
-                	index += 144;
-	if U && !D && L && !R
-                index = 50
-                if R is water
-                	index += 144;  
-*/
+	//Check if index is valid
+	/*
+	if (index < 0)
+		return 0;
+	if (index > last_tile)
+		return last_tile;
+	*/
+	assert(index >= 0);
+	assert(index <= last_tile);
+	return index;
 }
+
+void setTileTransitions(int *level, int l_width, int l_height)
+{
+	auto m_tiles = initializeTiles(l_width, l_height);
+	//Set up variables
+	int ul, u, ur, l, c, r, dl, d, dr;
+	//ul = u = ur = l = c = r = dl = d = dr = _INVALID_RANGE;
+	ul = 0;				u = ul + 1;		ur = u + 1;
+	l = ul + l_width;	c = l + 1;		r = c + 1;
+	dl = l + l_width;	d = dl + 1;		dr = d + 1;
+	//assert(l == 32);
+	//assert(dl == 64);
+	int limit = l_width * l_height - 1;
+
+	//Set Tile Transitions
+	for (int j = 0; j < l_height; j++)
+	{
+		for (int i = 0; i < l_width; i++)
+		{
+			int index = i * l_width + j;
+
+			//Compute tile transitions
+			m_tiles[index] = tileTransitions(ul, u, ur, l, c, r, dl, d, dr, l_width, l_height);
+		}
+	}
+	//Once tile transitions have been set, copy the new tiles to the old tile array
+	//copyTiles(m_tiles, level, l_width, l_height);
+	delete m_tiles;
+}
+
 int *generate_samples()
 {
 	//1. Create an array of noise values
@@ -291,14 +304,17 @@ int *generate_samples()
 	writer.WriteDestFile();
 
 	//Create an array of noise values from this generated image
-	const int m_sample_width = heightMap.GetWidth() / 8;;
+	const int m_sample_width = heightMap.GetWidth() / 8;
 	const int m_sample_height = heightMap.GetHeight() / 8;
 	auto m_samples = new int[m_sample_width * m_sample_height];
 
+	cout << "m_samples width: " << m_sample_width << "\n";
+	cout << "m_samples height: " << m_sample_height << "\n";
+
 	//2. Covert this noise array into (typically integer) values that represent the different terrain types.
-	for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
+	for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
 	{
-		for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
+		for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
 		{
 			//TESTING: PRINT OUT VALUES
 			//cout << heightMap.GetValue(i,j) << "     ";
@@ -309,46 +325,48 @@ int *generate_samples()
 			//Sample the noise at index (mw, mh)
 			float noise_sample = heightMap.GetValue(mw, mh);
 
-			//Convert the noise values into usable terrain values
-			int terrain_value = -100;
-			if (noise_sample < -0.4f)
-				terrain_value = _WATER;	//Water
-			if (noise_sample < -0.1f && noise_sample >= -0.4f)
-				terrain_value = _SAND;
-			if (noise_sample < 0.5f && noise_sample >= -0.1f)
-				terrain_value = _GRASS;
-			if (noise_sample < 0.9f && noise_sample >= 0.5f)
-				terrain_value = _SHRUB;
-			if (noise_sample < 1.1f && noise_sample >= 0.9f)
-				terrain_value = _FOREST;
-			if (noise_sample <= 1.2f && noise_sample >= 1.1f) 
-			{
-				terrain_value = _ICE;
-			}
-			else
-				terrain_value = _INVALID_RANGE;
+			//TESTING: PRINT OUT VALUES
+			//cout << noise_sample << "     ";
 
+			//Convert the noise values into usable terrain values
+			int terrain_value = _INVALID;
+			if (noise_sample < -0.4f)								{	terrain_value = _WATER;		}
+			else if (noise_sample < -0.1f && noise_sample >= -0.4f) {	terrain_value = _DIRT;		}
+			else if (noise_sample < 0.5f && noise_sample >= -0.1f)	{	terrain_value = _GRASS;		}
+			else if (noise_sample < 0.9f && noise_sample >= 0.5f)	{	terrain_value = _SHRUB;		}
+			else if (noise_sample < 1.1f && noise_sample >= 0.9f)	{	terrain_value = _ROCK;		}
+			else if (noise_sample <= 1.2f && noise_sample >= 1.1f)	{	terrain_value = _BARREL;	}
+			else													{	terrain_value = _SAND;		}
+			//Check for valid terrain_value and index 
+			const int invalid_range = _INVALID;
+			assert(terrain_value != invalid_range);
+			assert(index >= 0);
+			assert(index < m_sample_width * m_sample_height);
+			
 			//Store the terrain value
 			m_samples[index] = terrain_value;
 
 			//Testing tilemap
-			//cout << m_samples[index] << "\t";
+			//cout << m_samples[index] << " ";
 		}
 		//cout << "\n";
 	}
+	setTileTransitions(m_samples, m_sample_width, m_sample_height);
 	return m_samples;
 }
 
 int main(int argc, char** argv)
 {
 	//Generate noise and sample
-	//const int *m_samples = generate_samples();
+	const int *m_samples = generate_samples();
 	
 	// create the window
 	sf::RenderWindow window(sf::VideoMode(512, 256), "Tilemap");
 
 	// define the level with an array of tile indices
-	//const int *level = m_samples;
+	const int *level = m_samples;
+	const int level_width = 24;
+	const int level_height = 12;
 	/*const int level[] =
 	{
 		0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -360,14 +378,15 @@ int main(int argc, char** argv)
 		2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
 		0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1,
 	};*/
+	/*
 	const int level_size = 24 * 12;
 	int level[level_size];
 	for (int i = 0; i < level_size; i++)
 		level[i] = i;
-	
+	*/
 	// create the tilemap from the level definition
 	TileMap map;
-	if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(16, 16), level, 24, 12))
+	if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(16, 16), level, level_width, level_height))
 		return -1;
 
 	// run the main loop
@@ -380,12 +399,12 @@ int main(int argc, char** argv)
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
-
 		// draw the map
 		window.clear();
 		window.draw(map);
 		window.display();
 	}
+	delete m_samples;
 	return 0;
 }
 
