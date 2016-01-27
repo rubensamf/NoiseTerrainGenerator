@@ -12,7 +12,7 @@
 #include <SFML/Graphics.hpp>
 //#include <array>
 
-#define _INVALID  -1;
+#define _INVALID		-1;
 #define _WATER			171;
 #define _BARREL			68;
 #define _SAND			100;
@@ -100,7 +100,10 @@ void copyTiles(int *tiles, int* m_copy, int t_width, int t_height)
 	//auto m_copy = new int[t_width * t_height];
 	const int limit = t_width * t_height;
 	for (int i = 0; i < limit; i++)	
-	{	m_copy[i] = tiles[i];	}
+	{	
+		const int t = tiles[i];
+		m_copy[i] = t;
+	}
 	//return m_copy;
 }
 int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr, int level_width, int level_height)
@@ -127,8 +130,8 @@ Assume that those are true if the tile is grass and false if it isn't
 	const int last_tile		= (level_width * level_height) - 1;
 
 	//Check that c is a valid index
-	assert(c >= 0);
-	assert(c <= last_tile);
+	//assert(c >= 0);
+	//assert(c <= last_tile);
 
 	//If c is not grass, just return c
 	if (c != grass)
@@ -162,73 +165,73 @@ Assume that those are true if the tile is grass and false if it isn't
 	//c = _DIRT;
 */
 	
-	int index = -1;
+	int index = 0;
 
 	if (c == grass)
 	{
 		if (U && D && L && R)
-			index = 174;
-		if (U && D && L && R && !DR)
+		{	index = 174;		}
+		else if (U && D && L && R && !DR)
 		{
 			index = 0;
 			//Check if DR tile is water
-			DR = (dr == water) ? true : false;
-			if(DR)
+			//DR = (dr == water) ? true : false;
+			if(dr == water)
 				index += 144;
 		}
-		if (U && D && L && R && !DL)
+		else if (U && D && L && R && !DL)
 		{
 			index = 5;
 			//Check if DL tile is water
 			if (dl == water)
 				index += 144;
 		}
-		if (U && D && L && R && !UL)
+		else if (U && D && L && R && !UL)
 		{
 			index = 125;
 			if (ul == water)
 				index += 144;
 		}		
-		if (U && D && L && !R) 
+		else if (U && D && L && !R) 
 		{
 			index = 24;
 			if (r == water)
 				index += 144;
 		}
-		if (U && D && !L && R)
+		else if (U && D && !L && R)
 		{
 			index = 29;
 			if (l == water)
 				index += 144;
 		}
-		if (!U && D && L && R) 
+		else if (!U && D && L && R) 
 		{
 			index = 121;
 			if (u == water)
 				index += 144;
 		}
-		if (U && !D && L && R) {
+		else if (U && !D && L && R) {
 			index = 1;
 			if (d == water)
 				index += 144;
 		}
-		if (!U && D && L && !R) {
+		else if (!U && D && L && !R) {
 			index = 26;
 			if (r == water)
 				index += 144;
 		}
-		if (!U && D && !L && R) {
+		else if (!U && D && !L && R) {
 			index = 25;
 			if (u == water)
 				index += 144;
 		}
-		if (U && !D && !L && R)
+		else if (U && !D && !L && R)
 		{
 			index = 49;
 			if (l == water)
 				index += 144;
 		}
-		if (U && !D && L && !R) 
+		else if (U && !D && L && !R) 
 		{
 			index = 50;
 			if (r == water)
@@ -249,30 +252,77 @@ Assume that those are true if the tile is grass and false if it isn't
 
 void setTileTransitions(int *level, int l_width, int l_height)
 {
+	const int zero = 0;
+	const int invalid = _INVALID;
+	const int water = _WATER;
+	const int barrel = _BARREL;
+	const int sand = _SAND;
+	const int grass = _GRASS;
+	const int shrub = _SHRUB;
+	const int rock = _ROCK;
+	const int dirt = _DIRT;
+	const int last_tile = (l_width * l_height) - 1;
+
 	auto m_tiles = initializeTiles(l_width, l_height);
 	//Set up variables
-	int ul, u, ur, l, c, r, dl, d, dr;
-	//ul = u = ur = l = c = r = dl = d = dr = _INVALID_RANGE;
-	ul = 0;				u = ul + 1;		ur = u + 1;
-	l = ul + l_width;	c = l + 1;		r = c + 1;
-	dl = l + l_width;	d = dl + 1;		dr = d + 1;
+	
+	int ul_i, u_i, ur_i, l_i, c_i, r_i, dl_i, d_i, dr_i; //Tile indices
+	int UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V; //Tile values
+	bool UL, U, UR, L, R, DL, D, DR;					 //Tile flags
+	ul_i = u_i = ur_i = l_i = r_i = dl_i = d_i = dr_i = _INVALID;
+	UL_V = U_V = UR_V = L_V = C_V = R_V = DL_V = D_V = DR_V = _INVALID;
+	UL = U = UR = L = R = DL = D = DR = false;
+	
 	//assert(l == 32);
 	//assert(dl == 64);
-	int limit = l_width * l_height - 1;
+	const int limit = l_width * l_height;
 
 	//Set Tile Transitions
 	for (int j = 0; j < l_height; j++)
 	{
 		for (int i = 0; i < l_width; i++)
 		{
-			int index = i * l_width + j;
+			/*
+			int ul_i, u_i, ur_i, l_i, c_i, r_i, dl_i, d_i, dr_i; //Tile indices
+			int UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V; //Tile values
+			*/
+			const int index = i * l_width + j;
+			assert(index >= 0 && index < limit);
+			ul_i = index - 1 - l_width;	u_i = index - l_width;	ur_i = index + 1 - l_width;
+			l_i  = index - 1;			c_i = index;			r_i  = index + 1;
+			dl_i = index - 1 + l_width;	d_i = index + l_width;	dr_i = index + 1 + l_width;
 
+			assert(c_i >= 0 && c_i < limit);
+			C_V = level[c_i];
+
+			UL_V = (ul_i < 0 || ul_i >= limit) ? C_V : level[ul_i];
+			U_V  = (u_i  < 0 || u_i  >= limit) ? C_V : level[u_i];
+			UR_V = (ur_i < 0 || ur_i >= limit) ? C_V : level[ur_i];
+
+			L_V  = (l_i  < 0 || l_i  >= limit) ? C_V : level[l_i];
+			R_V  = (r_i  < 0 || r_i  >= limit) ? C_V : level[r_i];
+
+			DL_V = (dl_i < 0 || dl_i >= limit) ? C_V : level[dl_i];
+			D_V  = (d_i  < 0 || d_i  >= limit) ? C_V : level[d_i];
+			DR_V = (dr_i < 0 || dr_i >= limit) ? C_V : level[dr_i];
+
+			/*
+			UL = (UL_V == grass);
+			U = (U_V == grass);
+			UR = (UR_V == grass);
+			L = (L_V == grass);
+			R = (R_V == grass);
+			DL = (DL_V == grass);
+			D = (D_V == grass);
+			DR = (DR_V == grass);
+			*/
 			//Compute tile transitions
-			m_tiles[index] = tileTransitions(ul, u, ur, l, c, r, dl, d, dr, l_width, l_height);
+			assert(C_V != invalid);
+			m_tiles[index] = tileTransitions(UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V, l_width, l_height);
 		}
 	}
 	//Once tile transitions have been set, copy the new tiles to the old tile array
-	//copyTiles(m_tiles, level, l_width, l_height);
+	copyTiles(m_tiles, level, l_width, l_height);
 	delete m_tiles;
 }
 
