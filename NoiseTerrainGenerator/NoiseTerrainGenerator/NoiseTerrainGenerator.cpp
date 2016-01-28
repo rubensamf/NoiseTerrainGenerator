@@ -14,11 +14,14 @@
 
 #define _INVALID		-1;
 #define _WATER			171;
-#define _BARREL			68;
+#define _BARREL			171;
+//#define _BARREL		68;
 #define _SAND			100;
 #define _GRASS			150;
-#define _SHRUB			281;
-#define _ROCK			167;
+#define _SHRUB			150;
+//#define _SHRUB		281;
+//#define _ROCK			167;
+#define _ROCK			34;
 #define _DIRT			34;
 
 using namespace std;
@@ -106,6 +109,8 @@ void copyTiles(int *tiles, int* m_copy, int t_width, int t_height)
 	}
 	//return m_copy;
 }
+
+//This function and the tileset were made with help from the class Piazza page Note @20 "Tileset Transitions" by Adam Summerville
 int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr, int level_width, int level_height)
 {
 /*
@@ -129,15 +134,14 @@ Assume that those are true if the tile is grass and false if it isn't
 	const int dirt			= _DIRT;
 	const int last_tile		= (level_width * level_height) - 1;
 
-	//Check that c is a valid index
-	//assert(c >= 0);
-	//assert(c <= last_tile);
 
-	//If c is not grass, just return c
-	if (c != grass)
-		return c;
-	
-	//Otherwise check for transitions
+	//Correct for invalid input
+	if (c < 0)
+		c = water;
+	if (c > last_tile)
+		c = grass;
+
+	//Boolean check for transitions
 	bool UL, U, UR, L, R, DL, D, DR;
 	UL	= (ul	== grass);
 	U	= (u	== grass);
@@ -147,7 +151,15 @@ Assume that those are true if the tile is grass and false if it isn't
 	DL	= (dl	== grass);
 	D	= (d	== grass);
 	DR	= (dr	== grass);
+
+	//If c is not grass, just return c
+	if (c != grass)
+		return c;
 	/*
+	//Check that c is a valid index
+	assert(c >= 0);
+	assert(c <= last_tile);
+
 	//int ul, u, ur, l, r, dl, d, dr;
 	//ul = u = ur = l = r = dl = d = dr = _INVALID_RANGE;
 	//sf::Vector2i tile_indices(level_width, level_height);
