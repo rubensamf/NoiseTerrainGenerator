@@ -113,7 +113,8 @@ void copyTiles(int *tiles, int* m_copy, int t_width, int t_height)
 }
 
 //This function and the tileset were made with help from the class Piazza page Note @20 "Tileset Transitions" by Adam Summerville
-int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr, int level_width, int level_height)
+//int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr, int level_width, int level_height)
+int tileTransitions(int ul, int u, int ur, int l, int c, int r, int dl, int d, int dr)
 {
 /*
 The tiles are 16x16 and if a tile's index goes from top to bottom,
@@ -134,30 +135,40 @@ Assume that those are true if the tile is grass and false if it isn't
 	const int shrub			= _SHRUB;
 	const int rock			= _ROCK;
 	const int dirt			= _DIRT;
-	const int last_tile		= (level_width * level_height) - 1;
-
+	//const int last_tile		= (level_width * level_height) - 1;
 
 	//Correct for invalid input
+	/*
 	if (c < 0)
 		c = water;
 	if (c > last_tile)
 		c = grass;
-
+	*/
 	//Boolean check for transitions
 	bool UL, U, UR, L, R, DL, D, DR;
-	UL	= (ul	== grass);
-	U	= (u	== grass);
-	UR	= (ur	== grass);
-	L	= (l	== grass);
-	R	= (r	== grass);
-	DL	= (dl	== grass);
-	D	= (d	== grass);
-	DR	= (dr	== grass);
+	UL = (ul == grass);
+	U = (u == grass);
+	UR = (ur == grass);
+	L = (l == grass);
+	R = (r == grass);
+	DL = (dl == grass);
+	D = (d == grass);
+	DR = (dr == grass);
 
 	//If c is not grass, just return c
 	if (c != grass)
 		return c;
+
 	/*
+	UL = (ul == c);
+	U = (u == c);
+	UR = (ur == c);
+	L = (l == c);
+	R = (r == c);
+	DL = (dl == c);
+	D = (d == c);
+	DR = (dr == c);
+	
 	//Check that c is a valid index
 	assert(c >= 0);
 	assert(c <= last_tile);
@@ -181,10 +192,12 @@ Assume that those are true if the tile is grass and false if it isn't
 	
 	int index = 0;
 
-	if (c == grass)
-	{
+	if (c == grass){
 		if (U && D && L && R)
-		{	index = 174;		}
+		{	
+			//index = 174;		
+			index = c;
+		}
 		else if (U && D && L && R && !DR)
 		{
 			index = 0;
@@ -258,13 +271,14 @@ Assume that those are true if the tile is grass and false if it isn't
 		return 0;
 	if (index > last_tile)
 		return last_tile;
-	*/
+	
 	assert(index >= 0);
 	assert(index <= last_tile);
+	*/
 	return index;
 }
 
-void setTileTransitions(int *level, int l_width, int l_height)
+int *getTileTransitions(int *level, int l_width, int l_height)
 {
 	const int zero = 0;
 	const int invalid = _INVALID;
@@ -276,35 +290,41 @@ void setTileTransitions(int *level, int l_width, int l_height)
 	const int rock = _ROCK;
 	const int dirt = _DIRT;
 	const int last_tile = (l_width * l_height) - 1;
+	const int t_width = l_width / 4;
+	const int t_height = l_height / 4;
 
-	auto m_tiles = initializeTiles(l_width, l_height);
-	//Set up variables
-	
-	int ul_i, u_i, ur_i, l_i, c_i, r_i, dl_i, d_i, dr_i; //Tile indices
-	int UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V; //Tile values
-	bool UL, U, UR, L, R, DL, D, DR;					 //Tile flags
-	ul_i = u_i = ur_i = l_i = r_i = dl_i = d_i = dr_i = _INVALID;
-	UL_V = U_V = UR_V = L_V = C_V = R_V = DL_V = D_V = DR_V = _INVALID;
-	UL = U = UR = L = R = DL = D = DR = false;
-	
-	//assert(l == 32);
-	//assert(dl == 64);
 	const int limit = l_width * l_height;
+	const int t_last = t_width * t_height - 1;
 
+	//auto m_tiles = initializeTiles(l_width, l_height);
+	auto m_tiles = initializeTiles(t_width, t_height);
+	
+	//Set up variables
+	int ul_i, u_i, ur_i, l_i, c_i, r_i, dl_i, d_i, dr_i; //Tile indices
+	ul_i = u_i = ur_i = l_i = r_i = dl_i = d_i = dr_i = invalid;
+	int UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V; //Tile values
+	UL_V = U_V = UR_V = L_V = C_V = R_V = DL_V = D_V = DR_V = invalid;
+	//bool UL, U, UR, L, R, DL, D, DR;					 //Tile flags
+	//UL = U = UR = L = R = DL = D = DR = false;
+
+	int t_index = 0;
 	//Set Tile Transitions
-	for (int j = 0; j < l_height; j++)
+	//for (int j = 0; j < l_height; j ++)
+	for (int j = 1; j < l_height - 1; j += 4)
 	{
-		for (int i = 0; i < l_width; i++)
+		if (t_index > t_last)
+			break;
+		//for (int i = 0; i < l_width; i++)
+		for (int i = 1; i < l_width - 1; i += 4)
 		{
-			/*
-			int ul_i, u_i, ur_i, l_i, c_i, r_i, dl_i, d_i, dr_i; //Tile indices
-			int UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V; //Tile values
-			*/
-			const int index = i * l_width + j;
-			assert(index >= 0 && index < limit);
-			ul_i = index - 1 - l_width;	u_i = index - l_width;	ur_i = index + 1 - l_width;
-			l_i  = index - 1;			c_i = index;			r_i  = index + 1;
-			dl_i = index - 1 + l_width;	d_i = index + l_width;	dr_i = index + 1 + l_width;
+			if (t_index > t_last)
+				break;
+			const int l_index = i * l_width + j;
+
+			assert(l_index >= 0 && l_index < limit);
+			ul_i = l_index - 1 - l_width;	u_i = l_index - l_width;	ur_i = l_index + 1 - l_width;
+			l_i  = l_index - 1;				c_i = l_index;				r_i  = l_index + 1;
+			dl_i = l_index - 1 + l_width;	d_i = l_index + l_width;	dr_i = l_index + 1 + l_width;
 
 			assert(c_i >= 0 && c_i < limit);
 			C_V = level[c_i];
@@ -332,18 +352,30 @@ void setTileTransitions(int *level, int l_width, int l_height)
 			*/
 			//Compute tile transitions
 			assert(C_V != invalid);
-			m_tiles[index] = tileTransitions(UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V, l_width, l_height);
+			//m_tiles[index] = tileTransitions(UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V, l_width, l_height);
+			int tile = tileTransitions(UL_V, U_V, UR_V, L_V, C_V, R_V, DL_V, D_V, DR_V);
+			m_tiles[t_index] = tile;
+			t_index++;
 		}
 	}
-	//Once tile transitions have been set, copy the new tiles to the old tile array
-	copyTiles(m_tiles, level, l_width, l_height);
-	delete m_tiles;
+	//copyTiles(m_tiles, level, l_width, l_height);
+	//delete m_tiles;
+	return m_tiles;
 }
 
 int *generate_samples()
 {
 	//1. Create an array of noise values
 	//Creating a terrain height map
+	const int invalid = _INVALID;
+	const int water = _WATER;
+	const int barrel = _BARREL;
+	const int sand = _SAND;
+	const int grass = _GRASS;
+	const int shrub = _SHRUB;
+	const int rock = _ROCK;
+	const int dirt = _DIRT;
+
 	module::Perlin myModule;
 
 	utils::NoiseMap heightMap;
@@ -368,17 +400,21 @@ int *generate_samples()
 	writer.WriteDestFile();
 
 	//Create an array of noise values from this generated image
-	const int m_sample_width = heightMap.GetWidth() / 8;
-	const int m_sample_height = heightMap.GetHeight() / 8;
+	//const int m_sample_width = heightMap.GetWidth() / 8;
+	//const int m_sample_height = heightMap.GetHeight() / 8;
+	const int m_sample_width = heightMap.GetWidth();
+	const int m_sample_height = heightMap.GetHeight();
 	auto m_samples = new int[m_sample_width * m_sample_height];
 
 	cout << "m_samples width: " << m_sample_width << "\n";
 	cout << "m_samples height: " << m_sample_height << "\n";
 
 	//2. Covert this noise array into (typically integer) values that represent the different terrain types.
-	for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
+	//for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
+	for (int j = 0, mh = 0; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh++)
 	{
-		for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
+		//for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
+		for (int i = 0, mw = 0; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw++)
 		{
 			//TESTING: PRINT OUT VALUES
 			//cout << heightMap.GetValue(i,j) << "     ";
@@ -393,17 +429,16 @@ int *generate_samples()
 			//cout << noise_sample << "     ";
 
 			//Convert the noise values into usable terrain values
-			int terrain_value = _INVALID;
-			if (noise_sample < -0.4f)								{	terrain_value = _WATER;		}
-			else if (noise_sample < -0.1f && noise_sample >= -0.4f) {	terrain_value = _DIRT;		}
-			else if (noise_sample < 0.5f && noise_sample >= -0.1f)	{	terrain_value = _GRASS;		}
-			else if (noise_sample < 0.9f && noise_sample >= 0.5f)	{	terrain_value = _SHRUB;		}
-			else if (noise_sample < 1.1f && noise_sample >= 0.9f)	{	terrain_value = _ROCK;		}
-			else if (noise_sample <= 1.2f && noise_sample >= 1.1f)	{	terrain_value = _BARREL;	}
-			else													{	terrain_value = _SAND;		}
+			int terrain_value = invalid;
+			if (noise_sample < -0.4f)								{	terrain_value = water;		}
+			else if (noise_sample < -0.1f && noise_sample >= -0.4f) {	terrain_value = dirt;		}
+			else if (noise_sample < 0.5f && noise_sample >= -0.1f)	{	terrain_value = grass;		}
+			else if (noise_sample < 0.9f && noise_sample >= 0.5f)	{	terrain_value = shrub;		}
+			else if (noise_sample < 1.1f && noise_sample >= 0.9f)	{	terrain_value = rock;		}
+			else if (noise_sample <= 1.2f && noise_sample >= 1.1f)	{	terrain_value = barrel;		}
+			else													{	terrain_value = sand;		}
 			//Check for valid terrain_value and index 
-			const int invalid_range = _INVALID;
-			assert(terrain_value != invalid_range);
+			assert(terrain_value != invalid);
 			assert(index >= 0);
 			assert(index < m_sample_width * m_sample_height);
 			
@@ -415,8 +450,10 @@ int *generate_samples()
 		}
 		//cout << "\n";
 	}
-	setTileTransitions(m_samples, m_sample_width, m_sample_height);
-	return m_samples;
+	int *tiles = getTileTransitions(m_samples, m_sample_width, m_sample_height);
+	delete m_samples;
+	//return m_samples;
+	return tiles;
 }
 
 int main(int argc, char** argv)
@@ -429,8 +466,12 @@ int main(int argc, char** argv)
 
 	// define the level with an array of tile indices
 	const int *level = m_samples;
-	const int level_width = 24;
-	const int level_height = 12;
+	const int level_width = 256/4;
+	const int level_height = 256/4;
+	//const int level_width = 256;
+	//const int level_height = 256;
+	//const int level_width = 24;
+	//const int level_height = 12;
 	/*const int level[] =
 	{
 		0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
