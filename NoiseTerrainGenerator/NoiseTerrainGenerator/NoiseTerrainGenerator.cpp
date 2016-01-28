@@ -468,8 +468,6 @@ int main(int argc, char** argv)
 	const int *level = m_samples;
 	const int level_width = 256/4;
 	const int level_height = 256/4;
-	//const int level_width = 256;
-	//const int level_height = 256;
 	//const int level_width = 24;
 	//const int level_height = 12;
 	/*const int level[] =
