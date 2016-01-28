@@ -1,6 +1,8 @@
 /*	Author: Ruben Fitch
  *	CMPM265 HW #2: Noise And Terrain Generation
- *	Description: In this assignment you will use a noise function to create a tile-based terrain map suitable for a 2D game.
+ *	Description: 
+ *	In this assignment you will use a noise function to create a tile-based terrain map
+ *	suitable for a 2D game.
  */
 // NoiseTerrainGenerator.cpp : Defines the entry point for the console application.
 //
