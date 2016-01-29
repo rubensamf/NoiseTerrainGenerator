@@ -16,16 +16,24 @@
 
 #define _INVALID		-1;
 #define _WATER			171;
-#define _BARREL			171;
-//#define _BARREL			68;
-//#define _SAND			100;
-#define _SAND			34;
+//#define _BARREL			171;
+#define _BARREL			68;
+#define _SAND			100;
+//#define _SAND			34;
 #define _GRASS			150;
-#define _SHRUB			150;
-//#define _SHRUB			281;
-//#define _ROCK			239;
-#define _ROCK			34;
+//#define _SHRUB			150;
+#define _SHRUB			281;
+#define _ROCK			239;
+//#define _ROCK			34;
 #define _DIRT			34;
+#define _STUMP			205;
+#define _SAND_STUFF		75;
+#define _SAND_ROCK		99;
+#define _DIRT_STUFF		106;
+#define _GRASS_LEAVES	54;
+#define _GRASS_ROCK		126;
+#define _ICE			41;
+#define _TREASURE		140;
 
 using namespace std;
 using namespace noise;
@@ -1019,7 +1027,7 @@ int *getTileTransitions(int *level, int l_width, int l_height)
 	return m_tiles;
 }
 
-int *generate_samples()
+int *generate_samples(int seed)
 {
 	//1. Create an array of noise values
 	//Creating a terrain height map
@@ -1035,15 +1043,18 @@ int *generate_samples()
 	const int rock = _ROCK;
 	//const int rock = _DIRT;
 	const int dirt = _DIRT;
+	const int stump = _STUMP;
 
 	module::Perlin myModule;
+	myModule.SetSeed(seed);
 
 	utils::NoiseMap heightMap;
 	utils::NoiseMapBuilderPlane heightMapBuilder;
 	heightMapBuilder.SetSourceModule(myModule);
 	heightMapBuilder.SetDestNoiseMap(heightMap);
 	heightMapBuilder.SetDestSize(256, 256);
-	heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
+	heightMapBuilder.SetBounds(6.0, 10.0, 1.0, 5.0);
+	//heightMapBuilder.SetBounds(2.0, 6.0, 1.0, 5.0);
 	heightMapBuilder.Build();
 
 	//Rendering the terrain height map
@@ -1051,6 +1062,20 @@ int *generate_samples()
 	utils::Image image;
 	renderer.SetSourceNoiseMap(heightMap);
 	renderer.SetDestImage(image);
+	renderer.ClearGradient();
+	renderer.AddGradientPoint(-1.0000, utils::Color(0, 0, 128, 255)); // deeps
+	renderer.AddGradientPoint(-0.2500, utils::Color(0, 0, 255, 255)); // shallow
+	renderer.AddGradientPoint(0.0000, utils::Color(0, 128, 255, 255)); // shore
+	renderer.AddGradientPoint(0.0625, utils::Color(240, 240, 64, 255)); // sand
+	renderer.AddGradientPoint(0.1250, utils::Color(32, 160, 0, 255)); // grass
+	renderer.AddGradientPoint(0.3750, utils::Color(224, 224, 0, 255)); // dirt
+	renderer.AddGradientPoint(0.7500, utils::Color(128, 128, 128, 255)); // rock
+	renderer.AddGradientPoint(1.0000, utils::Color(255, 255, 255, 255)); // snow
+	renderer.EnableLight();
+	renderer.SetLightContrast(3.0);
+	renderer.SetLightBrightness(2.0);
+	renderer.SetLightAzimuth(60.0);
+	renderer.SetLightElev(30.0);
 	renderer.Render();
 
 	//Writing the image to an output file
@@ -1060,21 +1085,21 @@ int *generate_samples()
 	writer.WriteDestFile();
 
 	//Create an array of noise values from this generated image
-	//const int m_sample_width = heightMap.GetWidth() / 8;
-	//const int m_sample_height = heightMap.GetHeight() / 8;
-	const int m_sample_width = heightMap.GetWidth();
-	const int m_sample_height = heightMap.GetHeight();
+	const int m_sample_width = heightMap.GetWidth() / 8;
+	const int m_sample_height = heightMap.GetHeight() / 8;
+	//const int m_sample_width = heightMap.GetWidth();
+	//const int m_sample_height = heightMap.GetHeight();
 	auto m_samples = new int[m_sample_width * m_sample_height];
 
 	cout << "m_samples width: " << m_sample_width << "\n";
 	cout << "m_samples height: " << m_sample_height << "\n";
 
 	//2. Covert this noise array into (typically integer) values that represent the different terrain types.
-	//for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
-	for (int j = 0, mh = 0; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh++)
+	for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
+	//for (int j = 0, mh = 0; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh++)
 	{
-		//for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
-		for (int i = 0, mw = 0; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw++)
+		for (int i = 0, mw = 8; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw += 8)
+		//for (int i = 0, mw = 0; i < m_sample_width, mw < heightMap.GetWidth(); i++, mw++)
 		{
 			//TESTING: PRINT OUT VALUES
 			//cout << heightMap.GetValue(i,j) << "     ";
@@ -1091,12 +1116,15 @@ int *generate_samples()
 			//Convert the noise values into usable terrain values
 			int terrain_value = invalid;
 			if (noise_sample < -0.4f)								{	terrain_value = water;		}
-			else if (noise_sample < -0.1f && noise_sample >= -0.4f) {	terrain_value = dirt;		}
-			else if (noise_sample < 0.5f && noise_sample >= -0.1f)	{	terrain_value = grass;		}
-			else if (noise_sample < 0.9f && noise_sample >= 0.5f)	{	terrain_value = shrub;		}
-			else if (noise_sample < 1.1f && noise_sample >= 0.9f)	{	terrain_value = rock;		}
-			else if (noise_sample <= 1.2f && noise_sample >= 1.1f)	{	terrain_value = barrel;		}
-			else													{	terrain_value = sand;		}
+			else if (noise_sample < -0.3f && noise_sample >= -0.4f) {	terrain_value = _SAND_STUFF;		}
+			else if (noise_sample < -0.1f && noise_sample >= -0.3f) { terrain_value = sand; }
+			else if (noise_sample < 0.0f && noise_sample >= -0.1f)	{	terrain_value = _SAND_ROCK;		}
+			else if (noise_sample < 0.1f && noise_sample >= 0.0f) { terrain_value = dirt; }
+			else if (noise_sample < 0.2f && noise_sample >= 0.1f)  { terrain_value = _DIRT_STUFF; }
+			else if (noise_sample < 0.3f && noise_sample >= 0.2f)	{	terrain_value = _GRASS_LEAVES;		}
+			else if (noise_sample < 1.1f && noise_sample >= 0.3f)	{	terrain_value = grass;		}
+			else if (noise_sample <= 1.2f && noise_sample >= 1.1f)	{	terrain_value = _GRASS_ROCK;		}
+			else													{	terrain_value = _TREASURE;		}
 			//Check for valid terrain_value and index 
 			assert(terrain_value != invalid);
 			assert(index >= 0);
@@ -1110,16 +1138,18 @@ int *generate_samples()
 		}
 		//cout << "\n";
 	}
-	int *tiles = getTileTransitions(m_samples, m_sample_width, m_sample_height);
-	delete m_samples;
-	//return m_samples;
-	return tiles;
+	//int *tiles = getTileTransitions(m_samples, m_sample_width, m_sample_height);
+	//delete m_samples;
+	return m_samples;
+	//return tiles;
 }
 
 int main(int argc, char** argv)
 {
+	int seed = rand();
+	//int seed = 777;
 	//Generate noise and sample
-	const int *m_samples = generate_samples();
+	const int *m_samples = generate_samples(seed);
 	
 	// create the window
 	sf::RenderWindow window(sf::VideoMode(512, 256), "Tilemap");
@@ -1159,6 +1189,14 @@ int main(int argc, char** argv)
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
+			if (event.type == sf::Event::KeyPressed) {
+				delete m_samples;
+				seed = rand();
+				m_samples = generate_samples(seed);
+				level = m_samples;
+				if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(16, 16), level, level_width, level_height))
+					return -1;
+			}
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
