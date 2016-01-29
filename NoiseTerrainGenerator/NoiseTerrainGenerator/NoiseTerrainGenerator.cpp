@@ -17,12 +17,13 @@
 #define _INVALID		-1;
 #define _WATER			171;
 #define _BARREL			171;
-//#define _BARREL		68;
-#define _SAND			100;
+//#define _BARREL			68;
+//#define _SAND			100;
+#define _SAND			34;
 #define _GRASS			150;
 #define _SHRUB			150;
-//#define _SHRUB		281;
-//#define _ROCK			167;
+//#define _SHRUB			281;
+//#define _ROCK			239;
 #define _ROCK			34;
 #define _DIRT			34;
 
@@ -146,6 +147,7 @@ Assume that those are true if the tile is grass and false if it isn't
 	*/
 	//Boolean check for transitions
 	bool UL, U, UR, L, R, DL, D, DR;
+	/*
 	UL = (ul == grass);
 	U = (u == grass);
 	UR = (ur == grass);
@@ -154,12 +156,12 @@ Assume that those are true if the tile is grass and false if it isn't
 	DL = (dl == grass);
 	D = (d == grass);
 	DR = (dr == grass);
-
+	
 	//If c is not grass, just return c
-	if (c != grass)
-		return c;
+*/	
+	/*if (c != grass || c != sand || c != dirt || c != water)
+		return c;*/
 
-	/*
 	UL = (ul == c);
 	U = (u == c);
 	UR = (ur == c);
@@ -168,7 +170,7 @@ Assume that those are true if the tile is grass and false if it isn't
 	DL = (dl == c);
 	D = (d == c);
 	DR = (dr == c);
-	
+	/*
 	//Check that c is a valid index
 	assert(c >= 0);
 	assert(c <= last_tile);
@@ -190,86 +192,732 @@ Assume that those are true if the tile is grass and false if it isn't
 	//c = _DIRT;
 */
 	
-	int index = 0;
+	int index = _INVALID;
 
-	if (c == grass){
+	//if (c == grass){
 		if (U && D && L && R)
 		{	
 			//index = 174;		
 			index = c;
 		}
-		else if (U && D && L && R && !DR)
+		if (U && D && L && R && !DR)
 		{
-			index = 0;
-			//Check if DR tile is water
-			//DR = (dr == water) ? true : false;
-			if(dr == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 0;
+			}
+			else if (c == sand) {
+				index = 25;
+			}
+			else if (c == dirt) {
+				index = 32;
+			}
+			else if (c == water) {
+				index = 169;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && dr == sand) {
+				index += 0;
+			}
+			else if (c == grass && dr == dirt) {
+				index += 13;
+			}
+			else if (c == grass && dr == water) {
 				index += 144;
+			}
+			else if (c == sand && dr == grass) {
+				index += 0;
+			}
+			else if (c == sand && dr == dirt) {
+				index += 7;
+			}
+			else if (c == sand && dr == water) {
+				index += 151;
+			}
+			else if (c == water && dr == grass) {
+				index += 0;
+			}
+			else if (c == water && dr == sand) {
+				index += 7;
+			}
+			else if (c == water && dr == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && dr == grass) {
+				index += 6;
+			}
+			else if (c == dirt & dr == sand) {
+				index += 0;
+			}
+			else if (c == dirt && dr == water) {
+				index += 144;
+			}
 		}
 		else if (U && D && L && R && !DL)
 		{
-			index = 5;
-			//Check if DL tile is water
-			if (dl == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 5;
+			}
+			else if (c == sand) {
+				index = 26;
+			}
+			else if (c == dirt) {
+				index = 33;
+			}
+			else if (c == water) {
+				index = 170;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+			//Then offset index by the appropriate amount
+			if (c == grass && dl == sand) {
+				index += 0;
+			}
+			else if (c == grass && dl == dirt) {
+				index += 13;
+			}
+			else if (c == grass && dl == water) {
 				index += 144;
+			}
+			else if (c == sand && dl == grass) {
+				index += 0;
+			}
+			else if (c == sand && dl == dirt) {
+				index += 7;
+			}
+			else if (c == sand && dl == water) {
+				index += 151;
+			}
+			else if (c == water && dl == grass) {
+				index += 0;
+			}
+			else if (c == water && dl == sand) {
+				index += 7;
+			}
+			else if (c == water && dl == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && dl == grass) {
+				index += 6;
+			}
+			else if (c == dirt & dl == sand) {
+				index += 0;
+			}
+			else if (c == dirt && dl == water) {
+				index += 144;
+			}
 		}
 		else if (U && D && L && R && !UL)
 		{
-			index = 125;
-			if (ul == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 125;
+			}
+			else if (c == sand) {
+				index = 50;
+			}
+			else if (c == dirt) {
+				index = 57;
+			}
+			else if (c == water) {
+				index = 194;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && ul == sand) {
+				index += 0;
+			}
+			else if (c == grass && ul == dirt) {
+				index += 13;
+			}
+			else if (c == grass && ul == water) {
 				index += 144;
+			}
+			else if (c == sand && ul == grass) {
+				index += 0;
+			}
+			else if (c == sand && ul == dirt) {
+				index += 82;
+			}
+			else if (c == sand && ul == water) {
+				index += 226;
+			}
+			else if (c == water && ul == grass) {
+				index += 0;
+			}
+			else if (c == water && ul == sand) {
+				index += 7;
+			}
+			else if (c == water && ul == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && ul == grass) {
+				index += 6;
+			}
+			else if (c == dirt & ul == sand) {
+				index += 0;
+			}
+			else if (c == dirt && ul == water) {
+				index += 219;
+			}
+			/*index = 125;
+			if (ul == water)
+				index += 144;*/
 		}		
+		else if (U && D && L && R && !UR)
+		{
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 120;
+			}
+			else if (c == sand) {
+				index = 49;
+			}
+			else if (c == dirt) {
+				index = 56;
+			}
+			else if (c == water) {
+				index = 193;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && ur == sand) {
+				index += 0;
+			}
+			else if (c == grass && ur == dirt) {
+				index += 13;
+			}
+			else if (c == grass && ur == water) {
+				index += 144;
+			}
+			else if (c == sand && ur == grass) {
+				index += 0;
+			}
+			else if (c == sand && ur == dirt) {
+				index += 78;
+			}
+			else if (c == sand && ur == water) {
+				index += 222;
+			}
+			else if (c == water && ur == grass) {
+				index += 0;
+			}
+			else if (c == water && ur == sand) {
+				index += 7;
+			}
+			else if (c == water && ur == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && ur == grass) {
+				index += 6;
+			}
+			else if (c == dirt & ur == sand) {
+				index += 0;
+			}
+			else if (c == dirt && ur == water) {
+				index += 215;
+			}
+		}
 		else if (U && D && L && !R) 
 		{
-			index = 24;
-			if (r == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 24;
+			}
+			else if (c == sand) {
+				index = 29;
+			}
+			else if (c == dirt) {
+				index = 36;
+			}
+			else if (c == water) {
+				index = 173;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && r == sand) {
+				index += 0;
+			}
+			else if (c == grass && r == dirt) {
+				index += 13;
+			}
+			else if (c == grass && r == water) {
 				index += 144;
+			}
+			else if (c == sand && r == grass) {
+				index += 0;
+			}
+			else if (c == sand && r == dirt) {
+				index += 2;
+			}
+			else if (c == sand && r == water) {
+				index += 146;
+			}
+			else if (c == water && r == grass) {
+				index += 0;
+			}
+			else if (c == water && r == sand) {
+				index += 7;
+			}
+			else if (c == water && r == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && r == grass) {
+				index += 6;
+			}
+			else if (c == dirt & r == sand) {
+				index += 0;
+			}
+			else if (c == dirt && r == water) {
+				index += 139;
+			}
+			/*index = 24;
+			if (r == water)
+				index += 144;*/
 		}
 		else if (U && D && !L && R)
 		{
-			index = 29;
-			if (l == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 29;
+			}
+			else if (c == sand) {
+				index = 24;
+			}
+			else if (c == dirt) {
+				index = 31;
+			}
+			else if (c == water) {
+				index = 168;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && l == sand) {
+				index += 0;
+			}
+			else if (c == grass && l == dirt) {
+				index += 13;
+			}
+			else if (c == grass && l == water) {
 				index += 144;
+			}
+			else if (c == sand && l == grass) {
+				index += 0;
+			}
+			else if (c == sand && l == dirt) {
+				index += 12;
+			}
+			else if (c == sand && l == water) {
+				index += 156;
+			}
+			else if (c == water && l == grass) {
+				index += 0;
+			}
+			else if (c == water && l == sand) {
+				index += 7;
+			}
+			else if (c == water && l == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && l == grass) {
+				index += 6;
+			}
+			else if (c == dirt & l == sand) {
+				index += 0;
+			}
+			else if (c == dirt && l == water) {
+				index += 149;
+			}
+			/*index = 29;
+			if (l == water)
+				index += 144;*/
 		}
 		else if (!U && D && L && R) 
 		{
-			index = 121;
-			if (u == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 121;
+			}
+			else if (c == sand) {
+				index = 1;
+			}
+			else if (c == dirt) {
+				index = 8;
+			}
+			else if (c == water) {
+				index = 145;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && u == sand) {
+				index += 0;
+			}
+			else if (c == grass && u == dirt) {
+				index += 13;
+			}
+			else if (c == grass && u == water) {
 				index += 144;
+			}
+			else if (c == sand && u == grass) {
+				index += 0;
+			}
+			else if (c == sand && u == dirt) {
+				index += 127;
+			}
+			else if (c == sand && u == water) {
+				index += 271;
+			}
+			else if (c == water && u == grass) {
+				index += 0;
+			}
+			else if (c == water && u == sand) {
+				index += 7;
+			}
+			else if (c == water && u == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && u == grass) {
+				index += 6;
+			}
+			else if (c == dirt & u == sand) {
+				index += 0;
+			}
+			else if (c == dirt && u == water) {
+				index += 264;
+			}
+
+			/*index = 121;
+			if (u == water)
+				index += 144;*/
 		}
 		else if (U && !D && L && R) {
-			index = 1;
-			if (d == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 1;
+			}
+			else if (c == sand) {
+				index = 8;
+			}
+			else if (c == dirt) {
+				index = 128;
+			}
+			else if (c == water) {
+				index = 265;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && d == sand) {
+				index += 0;
+			}
+			else if (c == grass && d == dirt) {
+				index += 13;
+			}
+			else if (c == grass && d == water) {
 				index += 144;
+			}
+			else if (c == sand && d == grass) {
+				index += 121;
+			}
+			else if (c == sand && d == dirt) {
+				index += 0;
+			}
+			else if (c == sand && d == water) {
+				index += 144;
+			}
+			else if (c == water && d == grass) {
+				index += 0;
+			}
+			else if (c == water && d == sand) {
+				index += 7;
+			}
+			else if (c == water && d == dirt) {
+				index += 7;
+			}
+			else if (c == dirt && d == grass) {
+				index += 6;
+			}
+			else if (c == dirt & d == sand) {
+				index += 0;
+			}
+			else if (c == dirt && d == water) {
+				index += 24;
+			}
+
+			/*index = 1;
+			if (d == water)
+				index += 144;*/
 		}
 		else if (!U && D && L && !R) {
-			index = 26;
-			if (r == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 26;
+			}
+			else if (c == sand) {
+				index = 5;
+			}
+			else if (c == dirt) {
+				index = 12;
+			}
+			else if (c == water) {
+				index = 149;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && (r == sand || u == sand)) {
+				index += 0;
+			}
+			else if (c == grass && (r == dirt || u == dirt)) {
+				index += 13;
+			}
+			else if (c == grass && (r == water || u == water)) {
 				index += 144;
+			}
+			else if (c == sand && (r == grass || u == grass)) {
+				index += 0;
+			}
+			else if (c == sand && (r == dirt || u == dirt)) {
+				index += 28;
+			}
+			else if (c == sand && (r == water || u == water)) {
+				index += 172;
+			}
+			else if (c == water && (r == grass || u == grass)) {
+				index += 0;
+			}
+			else if (c == water && (r == sand || u == sand)) {
+				index += 7;
+			}
+			else if (c == water && (r == dirt || u == dirt)) {
+				index += 7;
+			}
+			else if (c == dirt && (r == grass || u == grass)) {
+				index += 6;
+			}
+			else if (c == dirt & (r == sand || u == sand)) {
+				index += 0;
+			}
+			else if (c == dirt && (r == water || u == water)) {
+				index += 165;
+			}
+			/*index = 26;
+			if (r == water)
+				index += 144;*/
 		}
 		else if (!U && D && !L && R) {
-			index = 25;
-			if (u == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 25;
+			}
+			else if (c == sand) {
+				index = 0;
+			}
+			else if (c == dirt) {
+				index = 7;
+			}
+			else if (c == water) {
+				index = 144;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && (l == sand || u == sand)) {
+				index += 0;
+			}
+			else if (c == grass && (l == dirt || u == dirt)) {
+				index += 13;
+			}
+			else if (c == grass && (l == water || u == water)) {
 				index += 144;
+			}
+			else if (c == sand && ( l == grass || u == grass)) {
+				index += 0;
+			}
+			else if (c == sand && ( l == dirt || u == dirt)) {
+				index += 32;
+			}
+			else if (c == sand && ( l == water || u == water)) {
+				index += 169;
+			}
+			else if (c == water && ( l == grass || u == grass)) {
+				index += 0;
+			}
+			else if (c == water && ( l == sand || u == sand)) {
+				index += 7;
+			}
+			else if (c == water && ( l == dirt || u == dirt)) {
+				index += 7;
+			}
+			else if (c == dirt && ( l == grass || u == grass)) {
+				index += 6;
+			}
+			else if (c == dirt & ( l == sand || u == sand)) {
+				index += 0;
+			}
+			else if (c == dirt && ( l == water || u == water)) {
+				index += 169;
+			}
+			/*index = 25;
+			if (u == water)
+				index += 144;*/
 		}
 		else if (U && !D && !L && R)
 		{
-			index = 49;
-			if (l == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 49;
+			}
+			else if (c == sand) {
+				index = 56;
+			}
+			else if (c == dirt) {
+				index = 127;
+			}
+			else if (c == water) {
+				index = 264;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && (l == sand || d == sand)) {
+				index += 0;
+			}
+			else if (c == grass && (l == dirt || d == dirt)) {
+				index += 13;
+			}
+			else if (c == grass && (l == water || d == water)) {
 				index += 144;
+			}
+			else if (c == sand && (l == grass || d == grass)) {
+				index += 64;
+			}
+			else if (c == sand && (l == dirt || d == dirt)) {
+				index += 0;
+			}
+			else if (c == sand && (l == water || d == water)) {
+				index += 144;
+			}
+			else if (c == water && (l == grass || d == grass)) {
+				index += 0;
+			}
+			else if (c == water && (l == sand || d == sand)) {
+				index += 7;
+			}
+			else if (c == water && (l == dirt || d == dirt)) {
+				index += 7;
+			}
+			else if (c == dirt && (l == grass || d == grass)) {
+				index += 6;
+			}
+			else if (c == dirt & (l == sand || d == sand)) {
+				index += 0;
+			}
+			else if (c == dirt && (l == water || d == water)) {
+				index += 73;
+			}
+			/*index = 49;
+			if (l == water)
+				index += 144;*/
 		}
 		else if (U && !D && L && !R) 
 		{
-			index = 50;
-			if (r == water)
+			//Set initial index value based on c
+			if (c == grass) {
+				index = 50;
+			}
+			else if (c == sand) {
+				index = 57;
+			}
+			else if (c == dirt) {
+				index = 132;
+			}
+			else if (c == water) {
+				index = 269;
+			}
+			else {//Should not occur
+				assert(false);
+			}
+
+			//Then offset index by the appropriate amount
+			if (c == grass && (r == sand || d == sand)) {
+				index += 0;
+			}
+			else if (c == grass && (r == dirt || d == dirt)) {
+				index += 13;
+			}
+			else if (c == grass && (r == water || d == water)) {
 				index += 144;
+			}
+			else if (c == sand && (r == grass || d == grass)) {
+				index += 68;
+			}
+			else if (c == sand && (r == dirt || d == dirt)) {
+				index += 0;
+			}
+			else if (c == sand && (r == water || d == water)) {
+				index += 144;
+			}
+			else if (c == water && (r == grass || d == grass)) {
+				index += 0;
+			}
+			else if (c == water && (r == sand || d == sand)) {
+				index += 7;
+			}
+			else if (c == water && (r == dirt || d == dirt)) {
+				index += 7;
+			}
+			else if (c == dirt && (r == grass || d == grass)) {
+				index += 6;
+			}
+			else if (c == dirt & (r == sand || d == sand)) {
+				index += 0;
+			}
+			else if (c == dirt && (r == water || d == water)) {
+				index += 69;
+			}
+			/*index = 50;
+			if (r == water)
+				index += 144;*/
 		}
-	}
+		else {
+			index = c;
+		}
+	//}
 	//Check if index is valid
-	/*
+	///*
 	if (index < 0)
-		return 0;
-	if (index > last_tile)
+		return c;
+	/*if (index > last_tile)
 		return last_tile;
 	
 	assert(index >= 0);
@@ -328,7 +976,15 @@ int *getTileTransitions(int *level, int l_width, int l_height)
 
 			assert(c_i >= 0 && c_i < limit);
 			C_V = level[c_i];
-
+			UL_V = level[ul_i];
+			U_V = level[u_i];
+			UR_V = level[ur_i];
+			L_V = level[l_i];
+			R_V = level[r_i];
+			DL_V = level[dl_i];
+			D_V = level[d_i];
+			DR_V = level[dr_i];
+			/*
 			UL_V = (ul_i < 0 || ul_i >= limit) ? C_V : level[ul_i];
 			U_V  = (u_i  < 0 || u_i  >= limit) ? C_V : level[u_i];
 			UR_V = (ur_i < 0 || ur_i >= limit) ? C_V : level[ur_i];
@@ -339,7 +995,7 @@ int *getTileTransitions(int *level, int l_width, int l_height)
 			DL_V = (dl_i < 0 || dl_i >= limit) ? C_V : level[dl_i];
 			D_V  = (d_i  < 0 || d_i  >= limit) ? C_V : level[d_i];
 			DR_V = (dr_i < 0 || dr_i >= limit) ? C_V : level[dr_i];
-
+			*/
 			/*
 			UL = (UL_V == grass);
 			U = (U_V == grass);
@@ -370,10 +1026,14 @@ int *generate_samples()
 	const int invalid = _INVALID;
 	const int water = _WATER;
 	const int barrel = _BARREL;
+	//const int barrel = _WATER;
 	const int sand = _SAND;
+	//const int sand = _WATER;
 	const int grass = _GRASS;
 	const int shrub = _SHRUB;
+	//const int shrub = _GRASS;
 	const int rock = _ROCK;
+	//const int rock = _DIRT;
 	const int dirt = _DIRT;
 
 	module::Perlin myModule;
