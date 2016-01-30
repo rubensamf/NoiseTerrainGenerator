@@ -34,6 +34,7 @@
 #define _GRASS_ROCK		126;
 #define _ICE			41;
 #define _TREASURE		140;
+#define _OTHER			23;
 
 using namespace std;
 using namespace noise;
@@ -934,6 +935,63 @@ Assume that those are true if the tile is grass and false if it isn't
 	return index;
 }
 
+/*int *getHorizontalTransitions(int *level, int l_width, int l_height)
+{
+	const int limit = l_width * l_height;
+	assert(limit > 0);
+	const int water = _WATER;
+	const int sand = _SAND;
+	const int sand_stuff = _SAND_STUFF;
+	const int sand_rock = _SAND_ROCK;
+	const int dirt = _DIRT;
+	const int dirt_stuff = _DIRT_STUFF;
+	const int grass = _GRASS;
+	const int grass_leaves = _GRASS_LEAVES;
+	const int grass_rock = _GRASS_ROCK;
+	const int treasure = _TREASURE;
+	const int other = _OTHER;
+
+	bool W, S, D, G, T, X, transition;
+	W = S = D = G = T = X = transition = false;
+	
+	int index = _INVALID;
+	int tile = _INVALID;
+	int type = _INVALID;
+	
+	int l_tile = level[0];
+	int l_type = _INVALID;
+	
+	int c_tile = level[0];
+	int c_type = _INVALID;
+	
+	int r_tile = level[0];
+	int r_type = _INVALID;
+
+	//bool WL, WC, WR, SL, SC, SR, DL, DC, DR, GL, GC, GR, TL, TC, TR, XL, XC, XR;
+	//WL =  WC =  WR =  SL =  SC =  SR =  DL =  DC =  DR =  GL =  GC =  GR =  TL =  TC =  TR =  XL =  XC =  XR = false;
+	for (int j = 0; j < l_height; j++)
+	{
+		for (int i = 0; i < l_width; i++)
+		{
+			W = S = D = G = T = X = transition = false;
+			index = i + l_width * j;
+			assert(index >= 0);
+			assert(index < limit);
+			tile = level[index];
+			if (tile == water)														{ type = water; }
+			else if (tile == sand || tile == sand_rock || tile == sand_stuff)		{ type = sand; }
+			else if (tile == dirt || tile == dirt_stuff)							{ type = dirt; }
+			else if (tile == grass || tile == grass_leaves || tile == grass_rock)	{ type = grass; }
+			else if (tile == treasure)												{ type = treasure; }
+			else																	{ type = other; }
+			l_tile = c_tile;
+			c_tile = r_tile;
+			r_tile = tile;
+
+			level[index] = transition;
+		}
+	}
+}*/
 int *getTileTransitions(int *level, int l_width, int l_height)
 {
 	const int zero = 0;
@@ -1027,7 +1085,7 @@ int *getTileTransitions(int *level, int l_width, int l_height)
 	return m_tiles;
 }
 
-int *generate_samples(int seed)
+int *generate_samples(int seed, int width, int height)
 {
 	//1. Create an array of noise values
 	//Creating a terrain height map
@@ -1091,8 +1149,8 @@ int *generate_samples(int seed)
 	//const int m_sample_height = heightMap.GetHeight();
 	auto m_samples = new int[m_sample_width * m_sample_height];
 
-	cout << "m_samples width: " << m_sample_width << "\n";
-	cout << "m_samples height: " << m_sample_height << "\n";
+	//cout << "m_samples width: " << m_sample_width << "\n";
+	//cout << "m_samples height: " << m_sample_height << "\n";
 
 	//2. Covert this noise array into (typically integer) values that represent the different terrain types.
 	for (int j = 0, mh = 8; j < m_sample_height, mh < heightMap.GetHeight(); j++, mh += 8)
@@ -1105,7 +1163,7 @@ int *generate_samples(int seed)
 			//cout << heightMap.GetValue(i,j) << "     ";
 
 			//Computer the index as if it was a 2D array
-			int index = i * m_sample_width + j;
+			int index = i + m_sample_width * j;
 
 			//Sample the noise at index (mw, mh)
 			float noise_sample = heightMap.GetValue(mw, mh);
@@ -1139,6 +1197,7 @@ int *generate_samples(int seed)
 		//cout << "\n";
 	}
 	//int *tiles = getTileTransitions(m_samples, m_sample_width, m_sample_height);
+	//int *tiles = getHorizontalTransitions(m_samples, m_sample_width, m_sample_height);
 	//delete m_samples;
 	return m_samples;
 	//return tiles;
@@ -1149,15 +1208,22 @@ int main(int argc, char** argv)
 	int seed = rand();
 	//int seed = 777;
 	//Generate noise and sample
-	const int *m_samples = generate_samples(seed);
-	
+	const int width = 256;
+	const int height = 256;
+	const int render_width = 512;
+	const int render_height = 256;
+	const int level_width = width / 4;
+	const int level_height = height / 4;
+	const int vector_width = 16;
+	const int vector_height = 16;
+	const int *m_samples = generate_samples(seed, width, height);
+
 	// create the window
-	sf::RenderWindow window(sf::VideoMode(512, 256), "Tilemap");
+	sf::RenderWindow window(sf::VideoMode(render_width, render_height), "Tilemap");
 
 	// define the level with an array of tile indices
 	const int *level = m_samples;
-	const int level_width = 256/4;
-	const int level_height = 256/4;
+
 	//const int level_width = 24;
 	//const int level_height = 12;
 	/*const int level[] =
@@ -1179,7 +1245,7 @@ int main(int argc, char** argv)
 	*/
 	// create the tilemap from the level definition
 	TileMap map;
-	if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(16, 16), level, level_width, level_height))
+	if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(vector_width, vector_height), level, level_width, level_height))
 		return -1;
 
 	// run the main loop
@@ -1192,9 +1258,9 @@ int main(int argc, char** argv)
 			if (event.type == sf::Event::KeyPressed) {
 				delete m_samples;
 				seed = rand();
-				m_samples = generate_samples(seed);
+				m_samples = generate_samples(seed, width, height);
 				level = m_samples;
-				if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(16, 16), level, level_width, level_height))
+				if (!map.load("C:\\Users\\Ruben\\Pictures\\sheet.png", sf::Vector2u(vector_width, vector_height), level, level_width, level_height))
 					return -1;
 			}
 			if (event.type == sf::Event::Closed)
